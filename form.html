@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麻豆監理站115年度上半年消防民防編組訓練報名</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Microsoft JhengHei',Arial,sans-serif;background:#f0f4f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;}
+  .card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);padding:2rem;width:100%;max-width:480px;}
+  .header{text-align:center;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid #e5e7eb;}
+  .badge{display:inline-block;background:#e6f1fb;color:#0c447c;font-size:12px;padding:3px 12px;border-radius:99px;margin-bottom:10px;}
+  h1{font-size:18px;font-weight:600;color:#1a1a2e;line-height:1.5;}
+  .subtitle{font-size:13px;color:#6b7280;margin-top:6px;}
+  .field{margin-bottom:1.25rem;}
+  label{display:block;font-size:14px;color:#374151;font-weight:500;margin-bottom:6px;}
+  label .req{color:#e24b4a;}
+  input,textarea,select{width:100%;padding:10px 12px;font-size:14px;border:1px solid #d1d5db;border-radius:8px;outline:none;font-family:inherit;transition:border-color 0.2s;background:#fff;color:#374151;}
+  input:focus,textarea:focus,select:focus{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,0.12);}
+  textarea{height:80px;resize:vertical;}
+  .btn{width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.2s;}
+  .btn:hover{background:#0c447c;}
+  .btn:disabled{background:#9ca3af;cursor:not-allowed;}
+  .success{display:none;background:#eaf3de;border:1px solid #3b6d11;border-radius:8px;padding:1.25rem;text-align:center;margin-top:1rem;}
+  .success .icon{font-size:32px;margin-bottom:8px;}
+  .success h3{color:#27500a;font-size:16px;}
+  .success p{color:#3b6d11;font-size:13px;margin-top:4px;}
+  .error{display:none;background:#fcebeb;border:1px solid #a32d2d;border-radius:8px;padding:1rem;text-align:center;color:#791f1f;font-size:14px;margin-top:1rem;}
+  .footer{text-align:center;font-size:12px;color:#9ca3af;margin-top:1.5rem;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="badge">交通部公路局 麻豆監理站</div>
+    <h1>115年度上半年<br>消防民防編組訓練報名冊</h1>
+    <p class="subtitle">請填寫以下資料完成線上報名</p>
+  </div>
+
+  <div class="field">
+    <label>單位 <span class="req">*</span></label>
+    <select id="f-unit">
+      <option value="">— 請選擇單位 —</option>
+      <option>站長室</option>
+      <option>副站長室</option>
+      <option>第一股</option>
+      <option>第二股</option>
+      <option>第三股</option>
+      <option>第四股</option>
+      <option>第五股</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>職稱 <span class="req">*</span></label>
+    <input type="text" id="f-title" placeholder="例：請輸入職稱…">
+  </div>
+  <div class="field">
+    <label>姓名 <span class="req">*</span></label>
+    <input type="text" id="f-name" placeholder="請輸入姓名">
+  </div>
+  <div class="field">
+    <label>備註</label>
+    <textarea id="f-note" placeholder="如有特殊需求請說明（選填）"></textarea>
+  </div>
+
+  <button class="btn" id="submit-btn" onclick="submitForm()">送出報名</button>
+
+  <div class="success" id="success-box">
+    <div class="icon">✅</div>
+    <h3>報名成功！</h3>
+    <p>感謝您完成報名，請準時出席訓練。</p>
+  </div>
+  <div class="error" id="error-box">送出失敗，請稍後再試或聯絡承辦人員。</div>
+
+  <div class="footer">麻豆監理站 · 消防民防編組訓練</div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrrA6weUfSXWjBesLQDUP1WNsJh7Q0wqRaBH2u31zTwCxPLXLATX3_vAEltIG_QrFGxg/exec';
+
+async function submitForm() {
+  const unit  = document.getElementById('f-unit').value;
+  const title = document.getElementById('f-title').value.trim();
+  const name  = document.getElementById('f-name').value.trim();
+  const note  = document.getElementById('f-note').value.trim();
+  if (!unit)  { alert('請選擇單位'); return; }
+  if (!title) { alert('請填寫職稱'); return; }
+  if (!name)  { alert('請填寫姓名'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '送出中，請稍候…';
+  btn.disabled = true;
+  document.getElementById('success-box').style.display = 'none';
+  document.getElementById('error-box').style.display = 'none';
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ unit, title, name, note })
+    });
+    document.getElementById('success-box').style.display = 'block';
+    document.getElementById('f-unit').value  = '';
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-name').value  = '';
+    document.getElementById('f-note').value  = '';
+    btn.textContent = '再次報名';
+    btn.disabled = false;
+  } catch(e) {
+    document.getElementById('error-box').style.display = 'block';
+    btn.textContent = '送出報名';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

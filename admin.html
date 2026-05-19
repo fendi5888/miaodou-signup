@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>報名管理後台 — 麻豆監理站消防民防編組訓練</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Microsoft JhengHei',Arial,sans-serif;background:#f0f4f8;min-height:100vh;padding:1.5rem;}
+  .container{max-width:1000px;margin:0 auto;}
+  .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px;}
+  .top-bar h1{font-size:18px;font-weight:600;color:#1a1a2e;}
+  .top-bar p{font-size:13px;color:#6b7280;margin-top:2px;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:13px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#374151;cursor:pointer;font-family:inherit;font-weight:500;transition:background 0.15s;}
+  .btn:hover{background:#f3f4f6;}
+  .btn-blue{background:#185FA5;color:#fff;border-color:#185FA5;}
+  .btn-blue:hover{background:#0c447c;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem;}
+  .stat{background:#fff;border-radius:10px;padding:1rem 1.25rem;border:1px solid #e5e7eb;}
+  .stat .label{font-size:12px;color:#6b7280;margin-bottom:4px;}
+  .stat .value{font-size:24px;font-weight:600;color:#1a1a2e;}
+  .stat .value.sm{font-size:15px;padding-top:4px;}
+  .card{background:#fff;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden;}
+  .card-header{padding:1rem 1.25rem;border-bottom:1px solid #e5e7eb;}
+  .card-header h2{font-size:15px;font-weight:600;color:#1a1a2e;}
+  .tbl-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#185FA5;color:#fff;font-weight:500;padding:10px 12px;text-align:left;}
+  tbody td{padding:9px 12px;border-bottom:1px solid #f3f4f6;color:#374151;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:#f9fafb;}
+  tbody tr:hover{background:#eff6ff;}
+  .sig-cell{width:160px;min-width:160px;}
+  .sig-line{display:block;border-bottom:1px solid #9ca3af;margin:18px 8px 4px;height:1px;}
+  .empty{text-align:center;color:#9ca3af;padding:3rem;font-size:14px;}
+  .status-ok{color:#27500a;font-weight:500;}
+  .status-err{color:#791f1f;font-weight:500;}
+
+  @media print {
+    body{background:#fff;padding:0;}
+    .no-print{display:none!important;}
+    .print-title{display:block!important;}
+    .card{border:none;border-radius:0;box-shadow:none;}
+    .stats{display:none!important;}
+    .top-bar{display:none!important;}
+    thead th{background:#185FA5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .sig-line{border-bottom:1px solid #374151!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    table{font-size:12px;}
+    thead th{padding:7px 10px;}
+    tbody td{padding:10px 10px;}
+  }
+  .print-title{display:none;text-align:center;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:2px solid #185FA5;}
+  .print-title h1{font-size:20px;font-weight:700;color:#1a1a2e;}
+  .print-title p{font-size:13px;color:#555;margin-top:6px;}
+  .print-footer{display:none;}
+  @media print{
+    .print-footer{display:flex;justify-content:space-between;margin-top:2rem;font-size:12px;color:#555;border-top:1px solid #d1d5db;padding-top:0.75rem;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="print-title">
+    <h1>麻豆監理站115年度上半年消防民防編組訓練報名冊</h1>
+    <p>列印時間：<span id="print-time"></span>　　共 <span id="print-count">0</span> 人報名</p>
+  </div>
+
+  <div class="top-bar no-print">
+    <div>
+      <h1>報名管理後台</h1>
+      <p>麻豆監理站 · 115年度上半年消防民防編組訓練</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="loadData()">🔄 重新整理</button>
+      <button class="btn" onclick="exportCSV()">⬇ 匯出 CSV</button>
+      <button class="btn btn-blue" onclick="window.print()">🖨 列印報名冊</button>
+    </div>
+  </div>
+
+  <div class="stats no-print">
+    <div class="stat"><div class="label">報名總人數</div><div class="value" id="stat-total">—</div></div>
+    <div class="stat"><div class="label">最新報名者</div><div class="value sm" id="stat-latest">—</div></div>
+    <div class="stat"><div class="label">最後更新</div><div class="value sm" id="stat-time">—</div></div>
+    <div class="stat"><div class="label">連線狀態</div><div class="value sm" id="stat-status">未載入</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header no-print">
+      <h2>報名名單</h2>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:46px;">編號</th>
+            <th style="width:90px;">單位</th>
+            <th style="width:90px;">職稱</th>
+            <th style="width:90px;">姓名</th>
+            <th style="width:150px;" class="no-print">報名時間</th>
+            <th class="sig-cell">現場簽名</th>
+            <th class="no-print">備註</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" class="empty">請點「重新整理」載入報名資料</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="print-footer">
+    <span>承辦人：＿＿＿＿＿＿</span>
+    <span>主管：＿＿＿＿＿＿</span>
+    <span>列印時間：<span id="print-time2"></span></span>
+  </div>
+
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrrA6weUfSXWjBesLQDUP1WNsJh7Q0wqRaBH2u31zTwCxPLXLATX3_vAEltIG_QrFGxg/exec';
+let allData = [];
+
+const now = new Date().toLocaleString('zh-TW');
+document.getElementById('print-time').textContent = now;
+document.getElementById('print-time2').textContent = now;
+
+async function loadData() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '<tr><td colspan="7" class="empty">載入中…</td></tr>';
+  document.getElementById('stat-status').textContent = '載入中';
+  document.getElementById('stat-status').className = 'value sm';
+  try {
+    const res = await fetch(GAS_URL + '?t=' + Date.now());
+    const json = await res.json();
+    allData = json.data || [];
+    const rows = allData.slice(1);
+    document.getElementById('stat-total').textContent = rows.length;
+    document.getElementById('print-count').textContent = rows.length;
+    document.getElementById('stat-latest').textContent = rows.length ? (rows[rows.length-1][3] || '—') : '—';
+    document.getElementById('stat-time').textContent = new Date().toLocaleTimeString('zh-TW');
+    document.getElementById('stat-status').textContent = '連線正常';
+    document.getElementById('stat-status').className = 'value sm status-ok';
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">目前尚無報名資料</td></tr>';
+      return;
+    }
+    // 欄位順序：報名時間[0] 單位[1] 職稱[2] 姓名[3] 備註[4]
+    tbody.innerHTML = rows.map((r, i) => `
+      <tr>
+        <td style="text-align:center;">${i + 1}</td>
+        <td>${r[1] || ''}</td>
+        <td>${r[2] || ''}</td>
+        <td>${r[3] || ''}</td>
+        <td class="no-print">${r[0] || ''}</td>
+        <td class="sig-cell"><span class="sig-line"></span></td>
+        <td class="no-print">${r[4] || ''}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">載入失敗，請確認 Apps Script 已正確部署並重新整理</td></tr>';
+    document.getElementById('stat-status').textContent = '連線失敗';
+    document.getElementById('stat-status').className = 'value sm status-err';
+  }
+}
+
+function exportCSV() {
+  if (!allData.length) { alert('請先點「重新整理」載入資料'); return; }
+  const csv = allData.map(r => r.map(c => '"' + (c+'').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '麻豆監理站訓練報名冊_' + new Date().toLocaleDateString('zh-TW').replace(/\//g,'-') + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+loadData();
+</script>
+</body>
+</html>
