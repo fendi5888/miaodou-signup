@@ -6,31 +6,73 @@
 <title>麻豆監理站 自衛消防編組訓練報名</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Microsoft JhengHei',Arial,sans-serif;background:#f0f4f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;}
+  
+  /* 這裡設定基礎字體大小，並加入平滑縮放效果 */
+  html {
+    font-size: 16px; 
+    transition: font-size 0.2s ease;
+  }
+  
+  body{font-family:'Microsoft JhengHei',Arial,sans-serif;background:#f0f4f8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;}
+  
+  /* 頂部字體工具列 */
+  .size-control {
+    width: 100%;
+    max-width: 440px;
+    text-align: right;
+    margin-bottom: 8px;
+  }
+  .size-btn {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    padding: 4px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #374151;
+    margin-left: 4px;
+  }
+  .size-btn:hover { background: #e5e7eb; }
+
+  /* 將原本的固定的 px 改為 rem 相對單位，這樣只要 html 字體變大，整個表單就會一起等比例變大 */
   .card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);padding:2rem;width:100%;max-width:440px;}
   .header{text-align:center;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid #e5e7eb;}
-  .badge{display:inline-block;background:#e6f1fb;color:#0c447c;font-size:12px;padding:3px 12px;border-radius:99px;margin-bottom:10px;}
-  h1{font-size:17px;font-weight:600;color:#1a1a2e;line-height:1.6;}
+  
+  /* 調整各元件大小（使用 rem） */
+  .badge{display:inline-block;background:#e6f1fb;color:#0c447c;font-size:0.85rem;padding:4px 14px;border-radius:99px;margin-bottom:10px;font-weight:bold;}
+  h1{font-size:1.3rem;font-weight:600;color:#1a1a2e;line-height:1.6;}
   .field{margin-bottom:1.25rem;}
-  label{display:block;font-size:14px;color:#374151;font-weight:500;margin-bottom:6px;}
+  label{display:block;font-size:1rem;color:#374151;font-weight:600;margin-bottom:8px;}
   label .req{color:#e24b4a;}
-  input,select{width:100%;padding:10px 12px;font-size:14px;border:1px solid #d1d5db;border-radius:8px;outline:none;font-family:inherit;transition:border-color 0.2s;background:#fff;color:#374151;}
+  
+  input,select{width:100%;padding:12px;font-size:1rem;border:1px solid #d1d5db;border-radius:8px;outline:none;font-family:inherit;transition:border-color 0.2s;background:#fff;color:#374151;}
   input:focus,select:focus{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,0.12);}
-  .btn{width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.2s;}
+  
+  .btn{width:100%;padding:14px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.2s;}
   .btn:hover{background:#0c447c;}
   .btn:disabled{background:#9ca3af;cursor:not-allowed;}
+  
   .success{display:none;background:#eaf3de;border:1px solid #3b6d11;border-radius:8px;padding:1.25rem;text-align:center;margin-top:1rem;}
   .success .icon{font-size:32px;margin-bottom:8px;}
-  .success h3{color:#27500a;font-size:16px;}
-  .success p{color:#3b6d11;font-size:13px;margin-top:4px;}
-  .error{display:none;background:#fcebeb;border:1px solid #a32d2d;border-radius:8px;padding:1rem;text-align:center;color:#791f1f;font-size:14px;margin-top:1rem;}
-  .footer{text-align:center;font-size:12px;color:#9ca3af;margin-top:1.5rem;}
+  .success h3{color:#27500a;font-size:1.1rem;}
+  .success p{color:#3b6d11;font-size:0.9rem;margin-top:4px;}
+  .error{display:none;background:#fcebeb;border:1px solid #a32d2d;border-radius:8px;padding:1rem;text-align:center;color:#791f1f;font-size:1rem;margin-top:1rem;}
+  .footer{text-align:center;font-size:0.8rem;color:#9ca3af;margin-top:1.5rem;}
 </style>
 </head>
 <body>
+
+<!-- 新增：字體放大縮小控制鈕 -->
+<div class="size-control">
+  <span>字體：</span>
+  <button class="size-btn" onclick="setFontSize(16)">標準</button>
+  <button class="size-btn" onclick="setFontSize(20)">放大 A+</button>
+  <button class="size-btn" onclick="setFontSize(24)">特大 A++</button>
+</div>
+
 <div class="card">
   <div class="header">
-    <div class="badge">交通部公路局 麻豆監理站</div>
+    <div class="badge">麻豆監理站</div>
     <h1>自衛消防編組訓練<br>名冊暨簽到表</h1>
   </div>
 
@@ -69,6 +111,11 @@
 </div>
 
 <script>
+// 新增：控制網頁基礎字體大小的 JS 函數
+function setFontSize(pxSize) {
+  document.documentElement.style.fontSize = pxSize + 'px';
+}
+
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrrA6weUfSXWjBesLQDUP1WNsJh7Q0wqRaBH2u31zTwCxPLXLATX3_vAEltIG_QrFGxg/exec';
 
 async function submitForm() {
