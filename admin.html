@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理後台 — 麻豆監理站自衛消防編組訓練</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Microsoft JhengHei',Arial,sans-serif;background:#f0f4f8;min-height:100vh;padding:1.5rem;}
@@ -17,8 +16,6 @@
   .btn:hover{background:#f3f4f6;}
   .btn-blue{background:#185FA5;color:#fff;border-color:#185FA5;}
   .btn-blue:hover{background:#0c447c;}
-  .btn-green{background:#166534;color:#fff;border-color:#166534;}
-  .btn-green:hover{background:#14532d;}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem;}
   .stat{background:#fff;border-radius:10px;padding:1rem 1.25rem;border:1px solid #e5e7eb;}
   .stat .label{font-size:12px;color:#6b7280;margin-bottom:4px;}
@@ -30,71 +27,80 @@
   thead th{background:#185FA5;color:#fff;font-weight:500;padding:9px 10px;text-align:center;border:1px solid #0c447c;}
   tbody td{padding:8px 10px;border:1px solid #e5e7eb;color:#374151;text-align:center;vertical-align:middle;}
   tbody tr:nth-child(even){background:#f9fafb;}
+  .group-header td{background:#dbeafe;font-weight:600;color:#1e40af;text-align:left;padding-left:12px;}
+  .sig-cell{min-width:120px;}
+  .sig-line{display:block;border-bottom:1px solid #9ca3af;margin:16px 6px 2px;}
   .empty{text-align:center;color:#9ca3af;padding:3rem;font-size:14px;}
   .status-ok{color:#27500a;font-weight:500;}
   .status-err{color:#791f1f;font-weight:500;}
 
+  /* ========== 列印樣式 ========== */
   @media print {
-    body{background:#fff;padding:0;}
+    body{background:#fff;padding:0;font-size:12px;}
     .no-print{display:none!important;}
-    .print-wrap{display:block!important;}
     .container{max-width:100%;}
-    table{font-size:11px;}
-    thead th{background:#185FA5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-    tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .card{border:none;border-radius:0;}
+    .print-wrap{display:block!important;}
+    table{font-size:11px;width:100%;border-collapse:collapse;}
+    thead th{background:#185FA5!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:6px 8px;border:1px solid #0c447c;}
+    tbody td{padding:6px 8px;border:1px solid #aaa;}
+    .group-header td{background:#dbeafe!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .sig-line{border-bottom:1px solid #374151!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    tbody tr:nth-child(even){background:#f9fafb!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
 
   .print-wrap{display:none;}
-  .print-header{text-align:center;margin-bottom:0.75rem;}
-  .print-header h1{font-size:18px;font-weight:700;}
-  .print-meta{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:0;}
-  .print-meta td{border:1px solid #aaa;padding:6px 10px;}
-  .write-line{display:inline-block;width:140px;border-bottom:1px solid #333;margin:0 4px;}
-  .write-line-lg{display:inline-block;width:200px;border-bottom:1px solid #333;margin:0 4px;}
-  .sig-line{display:block;border-bottom:1px solid #9ca3af;margin:16px 8px 2px;}
-  .print-notes{margin-top:1rem;font-size:11px;color:#374151;line-height:2.2;}
+  .print-header{text-align:center;margin-bottom:0.5rem;}
+  .print-header h1{font-size:18px;font-weight:700;letter-spacing:1px;}
+  .print-meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #aaa;border-bottom:none;font-size:13px;}
+  .print-meta .meta-row{padding:5px 10px;border-bottom:1px solid #aaa;display:flex;align-items:center;gap:8px;}
+  .print-meta .meta-row span{color:#555;}
+  .print-meta .meta-row .sig-space{display:inline-block;width:100px;border-bottom:1px solid #333;margin-left:4px;}
+  .print-notes{margin-top:1rem;font-size:11px;color:#374151;line-height:2;}
+  .print-notes p{margin-bottom:2px;}
   .print-footer-sign{display:flex;justify-content:space-between;margin-top:1.5rem;font-size:12px;color:#555;border-top:1px solid #d1d5db;padding-top:0.75rem;}
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- 列印專用區塊 -->
-  <div class="print-wrap">
+  <!-- ===== 列印專用區塊 ===== -->
+  <div class="print-wrap" id="print-area">
     <div class="print-header">
       <h1>麻豆監理站　自衛消防編組訓練名冊暨簽到表</h1>
     </div>
-    <table class="print-meta">
-      <tr>
-        <td>時間：<span class="write-line-lg"></span></td>
-        <td>地點：<span class="write-line-lg"></span></td>
-      </tr>
-      <tr>
-        <td>自衛消防隊長：<span class="write-line"></span>簽名</td>
-        <td>防火管理人：<span class="write-line"></span>簽名</td>
-      </tr>
-    </table>
+    <div class="print-meta">
+      <div class="meta-row"><span>時間：</span>
+        <!-- ★ 修改訓練時間 ★ -->
+        115年度上半年（時間待定）
+      </div>
+      <div class="meta-row"><span>地點：</span>
+        <!-- ★ 修改訓練地點 ★ -->
+        四樓道安講習教室
+      </div>
+      <div class="meta-row"><span>自衛消防隊長：</span><span class="sig-space"></span>簽名</div>
+      <div class="meta-row"><span>防火管理人：</span><span class="sig-space"></span>簽名</div>
+    </div>
     <table id="print-table">
       <thead>
         <tr>
           <th style="width:44px;">編號</th>
-          <th style="width:80px;">班　別</th>
-          <th style="width:75px;">編組職務</th>
-          <th style="width:75px;">姓　名</th>
+          <th style="width:80px;">班別</th>
+          <th style="width:70px;">編組職務</th>
+          <th style="width:80px;">姓名</th>
           <th style="width:80px;">所屬部門</th>
-          <th style="min-width:130px;">簽　到　欄</th>
-          <th style="width:80px;">備　註</th>
+          <th class="sig-cell">簽到欄</th>
+          <th>備註</th>
         </tr>
       </thead>
       <tbody id="print-tbody"></tbody>
     </table>
     <div class="print-notes">
-      <div>1. 演練人員編號自行續增。</div>
-      <div>2. 安全防護班及救護班為員工人數在50人以上始需編組。</div>
-      <div>3. 各班別合計人數要與提報表人數相同。</div>
-      <div>4. 未簽到者請於簽到欄註記原因。</div>
-      <div>5. 請注意編組成員應與消防防護計畫書相符，如場所實際編組人員與消防防護計畫書不相符，應重新提報消防防護計畫書。</div>
+      <p>1. 演練人員編號自行續增。</p>
+      <p>2. 安全防護班及救護班為員工人數在50人以上始需編組。</p>
+      <p>3. 各班別合計人數要與提報表人數相同。</p>
+      <p>4. 未簽到者請於簽到欄註記原因。</p>
+      <p>5. 請注意編組成員應與消防防護計畫書相符，如場所實際編組人員與消防防護計畫書不相符，應重新提報消防防護計畫書。</p>
     </div>
     <div class="print-footer-sign">
       <span>承辦人：＿＿＿＿＿＿</span>
@@ -103,7 +109,7 @@
     </div>
   </div>
 
-  <!-- 螢幕管理介面 -->
+  <!-- ===== 螢幕管理介面 ===== -->
   <div class="no-print">
     <div class="top-bar">
       <div>
@@ -113,7 +119,6 @@
       <div class="btn-row">
         <button class="btn" onclick="loadData()">🔄 重新整理</button>
         <button class="btn" onclick="exportCSV()">⬇ 匯出 CSV</button>
-        <button class="btn btn-green" onclick="exportWord()">📄 匯出 Word</button>
         <button class="btn btn-blue" onclick="window.print()">🖨 列印報名冊</button>
       </div>
     </div>
@@ -131,57 +136,68 @@
         <thead>
           <tr>
             <th style="width:44px;">編號</th>
-            <th style="width:140px;">報名時間</th>
-            <th style="width:80px;">單位</th>
-            <th style="width:80px;">職稱</th>
+            <th style="width:130px;">報名時間</th>
+            <th style="width:80px;">班別</th>
+            <th style="width:70px;">編組職務</th>
             <th style="width:80px;">姓名</th>
+            <th style="width:80px;">所屬部門</th>
+            <th>備註</th>
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="5" class="empty">請點「重新整理」載入報名資料</td></tr>
+          <tr><td colspan="7" class="empty">請點「重新整理」載入報名資料</td></tr>
         </tbody>
       </table>
     </div>
   </div>
+
 </div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrrA6weUfSXWjBesLQDUP1WNsJh7Q0wqRaBH2u31zTwCxPLXLATX3_vAEltIG_QrFGxg/exec';
 let allData = [];
 
+const GROUP_ORDER = ['通報班','滅火班','避難引導班','安全防護班','救護班'];
+
 document.getElementById('print-time2').textContent = new Date().toLocaleString('zh-TW');
 
 async function loadData() {
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '<tr><td colspan="5" class="empty">載入中…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="empty">載入中…</td></tr>';
   document.getElementById('stat-status').textContent = '載入中';
   try {
     const res = await fetch(GAS_URL + '?t=' + Date.now());
     const json = await res.json();
     allData = json.data || [];
+    // 欄位：[0]時間 [1]班別 [2]部門 [3]職務 [4]姓名 [5]備註
     const rows = allData.slice(1);
     document.getElementById('stat-total').textContent = rows.length;
-    document.getElementById('stat-latest').textContent = rows.length ? (rows[rows.length-1][3] || '—') : '—';
+    document.getElementById('stat-latest').textContent = rows.length ? (rows[rows.length-1][4] || '—') : '—';
     document.getElementById('stat-time').textContent = new Date().toLocaleTimeString('zh-TW');
     document.getElementById('stat-status').textContent = '連線正常';
     document.getElementById('stat-status').className = 'value sm status-ok';
+
     if (rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty">目前尚無報名資料</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">目前尚無報名資料</td></tr>';
       renderPrint([]);
       return;
     }
+
     tbody.innerHTML = rows.map((r, i) => `
       <tr>
         <td>${i+1}</td>
         <td>${r[0]||''}</td>
         <td>${r[1]||''}</td>
-        <td>${r[2]||''}</td>
         <td>${r[3]||''}</td>
+        <td>${r[4]||''}</td>
+        <td>${r[2]||''}</td>
+        <td>${r[5]||''}</td>
       </tr>
     `).join('');
+
     renderPrint(rows);
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty">載入失敗，請確認 Apps Script 已正確部署</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">載入失敗，請確認 Apps Script 已正確部署</td></tr>';
     document.getElementById('stat-status').textContent = '連線失敗';
     document.getElementById('stat-status').className = 'value sm status-err';
   }
@@ -189,207 +205,45 @@ async function loadData() {
 
 function renderPrint(rows) {
   const tbody = document.getElementById('print-tbody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">尚無資料</td></tr>'; return; }
-  tbody.innerHTML = rows.map((r, i) => `
-    <tr>
-      <td>${i+1}</td>
-      <td></td>
-      <td></td>
-      <td>${r[3]||''}</td>
-      <td>${r[1]||''}</td>
-      <td><span class="sig-line"></span></td>
-      <td></td>
-    </tr>
-  `).join('');
+  if (rows.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty">尚無資料</td></tr>'; return; }
+
+  // 依班別分組排序
+  const grouped = {};
+  GROUP_ORDER.forEach(g => grouped[g] = []);
+  rows.forEach(r => {
+    const g = r[1] || '其他';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(r);
+  });
+
+  let html = '';
+  let seq = 1;
+  GROUP_ORDER.forEach(g => {
+    if (!grouped[g] || grouped[g].length === 0) return;
+    grouped[g].forEach((r, i) => {
+      const isLeader = r[3] === '班長';
+      html += `<tr${isLeader ? ' style="font-weight:600;"' : ''}>
+        <td>${seq++}</td>
+        <td>${i===0 ? g : ''}</td>
+        <td>${r[3]||''}</td>
+        <td>${r[4]||''}</td>
+        <td>${r[2]||''}</td>
+        <td class="sig-cell"><span class="sig-line"></span></td>
+        <td>${r[5]||''}</td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML = html;
 }
 
 function exportCSV() {
   if (!allData.length) { alert('請先點「重新整理」載入資料'); return; }
-  const csv = allData.map(r => r.map(c => '"'+(c+'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const csv = allData.map(r => r.map(c => '"' + (c+'').replace(/"/g,'""') + '"').join(',')).join('\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = '麻豆監理站消防編組訓練報名冊_'+new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')+'.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function exportWord() {
-  if (!allData.length) { alert('請先點「重新整理」載入資料'); return; }
-  const rows = allData.slice(1);
-  if (!rows.length) { alert('目前尚無報名資料'); return; }
-
-  const {
-    Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-    AlignmentType, PageOrientation, BorderStyle, WidthType, ShadingType, VerticalAlign
-  } = docx;
-
-  const bd = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
-  const borders = { top: bd, bottom: bd, left: bd, right: bd };
-  const cm = { top: 80, bottom: 80, left: 120, right: 120 };
-
-  const pageW = 15398;
-  const colW = [900, 1600, 1400, 1500, 1600, 4698, 3700];
-
-  function hCell(text, w) {
-    return new TableCell({
-      borders, width: { size: w, type: WidthType.DXA },
-      shading: { fill: "D9E1F2", type: ShadingType.CLEAR },
-      margins: cm, verticalAlign: VerticalAlign.CENTER,
-      children: [new Paragraph({
-        alignment: AlignmentType.CENTER,
-        children: [new TextRun({ text, bold: true, size: 22, font: "標楷體" })]
-      })]
-    });
-  }
-
-  function dCell(text, w) {
-    return new TableCell({
-      borders, width: { size: w, type: WidthType.DXA },
-      margins: cm, verticalAlign: VerticalAlign.CENTER,
-      children: [new Paragraph({
-        alignment: AlignmentType.CENTER,
-        children: [new TextRun({ text: text||"", size: 22, font: "標楷體" })]
-      })]
-    });
-  }
-
-  function sigCell(w) {
-    return new TableCell({
-      borders, width: { size: w, type: WidthType.DXA },
-      margins: { top: 80, bottom: 80, left: 200, right: 200 },
-      verticalAlign: VerticalAlign.CENTER,
-      children: [
-        new Paragraph({ children: [] }),
-        new Paragraph({
-          border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: "000000" } },
-          children: []
-        })
-      ]
-    });
-  }
-
-  function metaCell(labelText, w) {
-    return new TableCell({
-      borders, width: { size: w, type: WidthType.DXA }, margins: cm,
-      children: [new Paragraph({
-        children: [
-          new TextRun({ text: labelText, size: 22, bold: true, font: "標楷體" }),
-          new TextRun({ text: "　　　　　　　　　　　　　　", size: 22, font: "標楷體",
-            underline: { type: "single", color: "000000" } }),
-        ]
-      })]
-    });
-  }
-
-  function signCell(labelText, w) {
-    return new TableCell({
-      borders, width: { size: w, type: WidthType.DXA }, margins: cm,
-      children: [new Paragraph({
-        children: [
-          new TextRun({ text: labelText, size: 22, bold: true, font: "標楷體" }),
-          new TextRun({ text: "　　　　　　　　　", size: 22, font: "標楷體",
-            underline: { type: "single", color: "000000" } }),
-          new TextRun({ text: " 簽名", size: 22, font: "標楷體" }),
-        ]
-      })]
-    });
-  }
-
-  const dataRows = rows.map((r, i) =>
-    new TableRow({
-      height: { value: 560, rule: "exact" },
-      children: [
-        dCell(String(i+1), colW[0]),
-        dCell("", colW[1]),
-        dCell("", colW[2]),
-        dCell(r[3]||"", colW[3]),
-        dCell(r[1]||"", colW[4]),
-        sigCell(colW[5]),
-        dCell("", colW[6]),
-      ]
-    })
-  );
-
-  const doc = new Document({
-    sections: [{
-      properties: {
-        page: {
-          size: { width: 11906, height: 16838, orientation: PageOrientation.LANDSCAPE },
-          margin: { top: 720, right: 720, bottom: 720, left: 720 }
-        }
-      },
-      children: [
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 },
-          children: [new TextRun({ text: "麻豆監理站　自衛消防編組訓練名冊暨簽到表", bold: true, size: 36, font: "標楷體" })]
-        }),
-
-        new Table({
-          width: { size: pageW, type: WidthType.DXA },
-          columnWidths: [pageW/2, pageW/2],
-          rows: [
-            new TableRow({ children: [metaCell("時間：", pageW/2), metaCell("地點：", pageW/2)] }),
-            new TableRow({ children: [signCell("自衛消防隊長：", pageW/2), signCell("防火管理人：", pageW/2)] }),
-          ]
-        }),
-
-        new Paragraph({ spacing: { after: 120 }, children: [] }),
-
-        new Table({
-          width: { size: pageW, type: WidthType.DXA },
-          columnWidths: colW,
-          rows: [
-            new TableRow({
-              tableHeader: true,
-              height: { value: 500, rule: "exact" },
-              children: [
-                hCell("編號", colW[0]), hCell("班　別", colW[1]),
-                hCell("編組職務", colW[2]), hCell("姓　名", colW[3]),
-                hCell("所屬部門", colW[4]), hCell("簽　到　欄", colW[5]),
-                hCell("備　註", colW[6]),
-              ]
-            }),
-            ...dataRows,
-          ]
-        }),
-
-        new Paragraph({ spacing: { after: 160 }, children: [] }),
-
-        ...[
-          "1. 演練人員編號自行續增。",
-          "2. 安全防護班及救護班為員工人數在50人以上始需編組。",
-          "3. 各班別合計人數要與提報表人數相同。",
-          "4. 未簽到者請於簽到欄註記原因。",
-          "5. 請注意編組成員應與消防防護計畫書相符，如場所實際編組人員與消防防護計畫書不相符，應重新提報消防防護計畫書。",
-        ].map(t => new Paragraph({
-          spacing: { after: 60 },
-          children: [new TextRun({ text: t, size: 18, font: "標楷體" })]
-        })),
-
-        new Paragraph({ spacing: { after: 200 }, children: [] }),
-
-        new Paragraph({
-          children: [
-            new TextRun({ text: "承辦人：", size: 20, font: "標楷體" }),
-            new TextRun({ text: "　　　　　　　　　　", size: 20, font: "標楷體",
-              underline: { type: "single", color: "000000" } }),
-            new TextRun({ text: "　　　主管：", size: 20, font: "標楷體" }),
-            new TextRun({ text: "　　　　　　　　　　", size: 20, font: "標楷體",
-              underline: { type: "single", color: "000000" } }),
-          ]
-        }),
-      ]
-    }]
-  });
-
-  const blob = await Packer.toBlob(doc);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = '麻豆監理站消防編組訓練報名冊_' + new Date().toLocaleDateString('zh-TW').replace(/\//g,'-') + '.docx';
+  a.download = '麻豆監理站消防編組訓練報名冊_' + new Date().toLocaleDateString('zh-TW').replace(/\//g,'-') + '.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
