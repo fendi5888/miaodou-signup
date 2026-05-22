@@ -69,13 +69,14 @@
     <table id="print-table">
       <thead>
         <tr>
-          <th style="width:44px;">編號</th>
-          <th style="width:80px;">班　別</th>
-          <th style="width:75px;">編組職務</th>
-          <th style="width:75px;">姓　名</th>
-          <th style="width:80px;">所屬部門</th>
-          <th style="min-width:130px;">簽　到　欄</th>
-          <th style="width:80px;">備　註</th>
+          <th style="width:40px;">編號</th>
+          <th style="width:75px;">班　別</th>
+          <th style="width:70px;">編組職務</th>
+          <th style="width:70px;">姓　名</th>
+          <th style="width:75px;">所屬部門</th>
+          <th style="width:60px;">用　餐</th>
+          <th style="min-width:120px;">簽　到　欄</th>
+          <th style="width:75px;">備　註</th>
         </tr>
       </thead>
       <tbody id="print-tbody"></tbody>
@@ -124,10 +125,11 @@
             <th style="width:80px;">單位</th>
             <th style="width:80px;">職稱</th>
             <th style="width:80px;">姓名</th>
+            <th style="width:80px;">用餐</th>
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="5" class="empty">請點「重新整理」載入報名資料</td></tr>
+          <tr><td colspan="6" class="empty">請點「重新整理」載入報名資料</td></tr>
         </tbody>
       </table>
     </div>
@@ -136,6 +138,7 @@
 </div>
 
 <script>
+// 欄位順序：[0]報名時間 [1]單位 [2]職稱 [3]姓名 [4]用餐
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxrrA6weUfSXWjBesLQDUP1WNsJh7Q0wqRaBH2u31zTwCxPLXLATX3_vAEltIG_QrFGxg/exec';
 let allData = [];
 
@@ -143,7 +146,7 @@ document.getElementById('print-time2').textContent = new Date().toLocaleString('
 
 async function loadData() {
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '<tr><td colspan="5" class="empty">載入中…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="empty">載入中…</td></tr>';
   document.getElementById('stat-status').textContent = '載入中';
   try {
     const res = await fetch(GAS_URL + '?t=' + Date.now());
@@ -156,16 +159,17 @@ async function loadData() {
     document.getElementById('stat-status').textContent = '連線正常';
     document.getElementById('stat-status').className = 'value sm status-ok';
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty">目前尚無報名資料</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">目前尚無報名資料</td></tr>';
       renderPrint([]);
       return;
     }
     tbody.innerHTML = rows.map((r, i) => `<tr>
-      <td>${i+1}</td><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td>
+      <td>${i+1}</td><td>${r[0]||''}</td><td>${r[1]||''}</td>
+      <td>${r[2]||''}</td><td>${r[3]||''}</td><td>${r[4]||''}</td>
     </tr>`).join('');
     renderPrint(rows);
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty">載入失敗，請確認 Apps Script 已正確部署</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">載入失敗，請確認 Apps Script 已正確部署</td></tr>';
     document.getElementById('stat-status').textContent = '連線失敗';
     document.getElementById('stat-status').className = 'value sm status-err';
   }
@@ -173,9 +177,10 @@ async function loadData() {
 
 function renderPrint(rows) {
   const tbody = document.getElementById('print-tbody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">尚無資料</td></tr>'; return; }
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">尚無資料</td></tr>'; return; }
   tbody.innerHTML = rows.map((r, i) => `<tr>
-    <td>${i+1}</td><td></td><td></td><td>${r[3]||''}</td><td>${r[1]||''}</td>
+    <td>${i+1}</td><td></td><td></td>
+    <td>${r[3]||''}</td><td>${r[1]||''}</td><td>${r[4]||''}</td>
     <td><span class="sig-line"></span></td><td></td>
   </tr>`).join('');
 }
