@@ -55,7 +55,14 @@
     <label>姓名 <span class="req">*</span></label>
     <input type="text" id="f-name" placeholder="請輸入姓名">
   </div>
-
+  <div class="field">
+    <label>用餐選擇 <span class="req">*</span></label>
+    <select id="f-meal">
+      <option value="">— 請選擇用餐 —</option>
+      <option>葷食</option>
+      <option>素食</option>
+    </select>
+  </div>
   <button class="btn" id="submit-btn" onclick="submitForm()">送出報名</button>
 
   <div class="success" id="success-box">
@@ -78,6 +85,8 @@ async function submitForm() {
   if (!unit)  { alert('請選擇單位'); return; }
   if (!title) { alert('請填寫職稱'); return; }
   if (!name)  { alert('請填寫姓名'); return; }
+  const meal  = document.getElementById('f-meal').value;
+  if (!meal)  { alert('請選擇用餐'); return; }
 
   const btn = document.getElementById('submit-btn');
   btn.textContent = '送出中，請稍候…';
@@ -89,12 +98,13 @@ async function submitForm() {
     await fetch(GAS_URL, {
       method: 'POST', mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ unit, title, name })
+      body: JSON.stringify({ unit, title, name, meal })
     });
     document.getElementById('success-box').style.display = 'block';
     document.getElementById('f-unit').value  = '';
     document.getElementById('f-title').value = '';
     document.getElementById('f-name').value  = '';
+    document.getElementById('f-meal').value  = '';
     btn.textContent = '再次報名';
     btn.disabled = false;
   } catch(e) {
